@@ -1,0 +1,218 @@
+function varargout = gui6(varargin)
+% GUI6 MATLAB code for gui6.fig
+%      GUI6, by itself, creates a new GUI6 or raises the existing
+%      singleton*.
+%
+%      H = GUI6 returns the handle to a new GUI6 or the handle to
+%      the existing singleton*.
+%
+%      GUI6('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in GUI6.M with the given input arguments.
+%
+%      GUI6('Property','Value',...) creates a new GUI6 or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before gui6_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to gui6_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help gui6
+
+% Last Modified by GUIDE v2.5 07-Dec-2016 17:10:02
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @gui6_OpeningFcn, ...
+                   'gui_OutputFcn',  @gui6_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before gui6 is made visible.
+function gui6_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to gui6 (see VARARGIN)
+
+[DS123, Info123, errmsg123] = readuff('sig123.unv');
+
+% chirp
+chirp_frf = load('chirp-frf.mat');
+
+% noise
+noise_frf = load('noise-frf.mat');
+
+handles.data = struct('chirp', struct('frf', chirp_frf), 'noise', struct('frf', noise_frf), 'impulse', DS123);
+handles.dir = 'x';
+
+% Choose default command line output for gui6
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes gui6 wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = gui6_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+chirp = handles.data(1).chirp.frf.FRF.y_values.values;
+noise = handles.data(1).noise.frf.FRF.y_values.values;
+    
+    %t = 0:1:length(chirp(:, 1))-1;
+
+    len = length(chirp);
+    fp = 1000;
+    dt = 1/fp;
+
+    df = 1/(len*dt);
+    f = df*(0:len-1);
+
+    Xchirp = fft(chirp);
+    Xnoise = fft(noise);
+
+    plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2));
+    
+   switch handles.dir
+        case 'x'
+            axes(handles.axes1)
+                
+            Xchirp = fft(chirp(:,9));
+            Xnoise = fft(noise(:,9));
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2));
+            %plot(t, chirp(:, 9), t, noise(:, 9));
+            axes(handles.axes2)
+                
+            Xchirp = fft(chirp(:,6));
+            Xnoise = fft(noise(:,6));
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2));
+            %plot(t, chirp(:, 6), t, noise(:, 6));
+            axes(handles.axes3)
+            Xchirp = fft(chirp(:,3));
+            Xnoise = fft(noise(:,3));
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2));
+            %plot(t, chirp(:, 3), t, noise(:, 3));
+        case 'y'
+            axes(handles.axes1)
+            Xchirp = fft(chirp(:,8));
+            Xnoise = fft(noise(:,8));
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2));
+            
+                %plot(t, chirp(:, 8), t, noise(:, 8));
+            axes(handles.axes2)
+            Xchirp = fft(chirp(:,5));
+            Xnoise = fft(noise(:,5));
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2));
+                
+            %plot(t, chirp(:, 5), t, noise(:, 5));
+            axes(handles.axes3)
+            Xchirp = fft(chirp(:,2));
+            Xnoise = fft(noise(:,2));
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2));
+                
+            %plot(t, chirp(:, 2), t, noise(:, 2));
+        case 'z'
+            axes(handles.axes1)
+            Xchirp = fft(chirp(:,7));
+            Xnoise = fft(noise(:,7));
+            Ximpulset = fft(handles.data(5).impulse.x);
+            Ximpulse = fft(handles.data(5).impulse.measData);
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2),Ximpulset(1:len/2+1),abs(Ximpulse(1:len/2+1))/(len/2));
+            
+                %plot(t, chirp(:, 7), t, noise(:, 7), handles.data(5).impulse.x, handles.data(5).impulse.measData);
+            axes(handles.axes2)
+            Xchirp = fft(chirp(:,4));
+            Xnoise = fft(noise(:,4));
+            Ximpulset = fft(handles.data(6).impulse.x);
+            Ximpulse = fft(handles.data(6).impulse.measData);
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2),Ximpulset(1:len/2+1),abs(Ximpulse(1:len/2+1))/(len/2));
+            
+                %plot(t, chirp(:, 4), t, noise(:, 4), handles.data(6).impulse.x, handles.data(6).impulse.measData);
+            axes(handles.axes3)
+            Xchirp = fft(chirp(:,1));
+            Xnoise = fft(noise(:,1));
+            Ximpulset = fft(handles.data(7).impulse.x);
+            Ximpulse = fft(handles.data(7).impulse.measData);
+            plot(f(1:len/2+1),abs(Xchirp(1:len/2+1))/(len/2),f(1:len/2+1),abs(Xnoise(1:len/2+1))/(len/2),Ximpulset(1:len/2+1),abs(Ximpulse(1:len/2+1))/(len/2));
+            
+                %plot(t, chirp(:, 1), t, noise(:, 1), handles.data(7).impulse.x, handles.data(7).impulse.measData);
+            
+    end
+    
+    fprintf('Plotting for direction %s', handles.dir);
+    
+    axes(handles.axes1)
+	% label
+	fontSize = 10;
+	xlabel('Frequency [Hz]', 'FontSize', fontSize);
+	ylabel('Magnitude [dB]', 'FontSize', fontSize);
+    axis('tight');
+    
+    axes(handles.axes2)
+    % label
+	fontSize = 10;
+	xlabel('Frequency [Hz]', 'FontSize', fontSize);
+	ylabel('Magnitude [dB]', 'FontSize', fontSize);
+    axis('tight');
+    
+    axes(handles.axes3)
+    % label
+	fontSize = 10;
+	xlabel('Frequency [Hz]', 'FontSize', fontSize);
+	ylabel('Magnitude [dB]', 'FontSize', fontSize);
+    axis('tight');
+
+guidata(hObject, handles);
+
+
+% --- Executes when selected object is changed in uibuttongroup1.
+function uibuttongroup1_SelectionChangedFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in uibuttongroup1 
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+switch get(eventdata.NewValue, 'Tag')
+    case 'radiobutton1'
+        handles.dir = 'x';
+    case 'radiobutton2'
+        handles.dir = 'y';
+    case 'radiobutton3'
+        handles.dir = 'z';
+end
+
+%plotit(handles.data, handles.ax1, handles.ax2, handles.ax3, handles.dir);
+guidata(hObject, handles);
